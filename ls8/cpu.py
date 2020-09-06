@@ -2,12 +2,24 @@
 
 import sys
 
+# set instruction codes
+HLT = 0b00000001
+LDI = 0b10000010
+PRN = 0b01000111
+
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.is_running = True
+        # 256 bit memory
+        self.ram = [0] * 256
+        # temporary memory, read and write to
+        self.register = [0] * 8
+        # program counter
+        self.pc = 0
 
     def load(self):
         """Load a program into memory."""
@@ -15,28 +27,27 @@ class CPU:
         address = 0
 
         # For now, we've just hardcoded a program:
-
+        # memory array
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            0b10000010,  # LDI R0,8
             0b00000000,
             0b00001000,
-            0b01000111, # PRN R0
+            0b01000111,  # PRN R0
             0b00000000,
-            0b00000001, # HLT
+            0b00000001,  # HLT
         ]
 
         for instruction in program:
             self.ram[address] = instruction
             address += 1
 
-
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        # elif op == "SUB": etc
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -48,8 +59,8 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
-            #self.ie,
+            # self.fl,
+            # self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
             self.ram_read(self.pc + 2)
@@ -59,7 +70,38 @@ class CPU:
             print(" %02X" % self.reg[i], end='')
 
         print()
+    # Inside the CPU, there are two internal registers used for memory operations:
+    # the Memory Address Register (MAR) and the Memory Data Register (MDR).
+    # The MAR contains the address that is being read or written to.
+    # The MDR contains the data that was read or the data to write.
+    # You dont need to add the MAR or MDR to your CPU class,
+    # but they would make handy parameter names for ram_read() and ram_write()
+
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self):
+        self.ram[MAR] = MDR
 
     def run(self):
         """Run the CPU."""
         pass
+        while self.is_running:
+            instruction = self.ram_read(self.pc)
+
+            operand_a = self.ram_read(self.pc+1)
+            operand_b = self.ram_read(self.pc+2)
+
+            if instruction == LDI:
+
+                self.register[operand_a] = operand_b
+                self.pc += 3
+
+            elif instruction == PRN:
+
+                print(self.register[operand_a])
+                self.pc += 2
+
+            elif instruction == HLT:
+                self.running = False
+                self.pc += 1
