@@ -1,5 +1,6 @@
 """CPU functionality."""
-# TODO Why are my instructions not being interpretted correctly
+# TODO
+# TODO - use number of operands +1  to increment PC
 import sys
 
 
@@ -20,7 +21,8 @@ class CPU:
         self.ops = {
             'HLT': 0b00000001,  # Halt
             'LDI': 0b10000010,
-            'PRN': 0b01000111  # Print
+            'PRN': 0b01000111,  # Print
+            'MUL': 0b10100010  # multiply
         }
 
     def load(self):
@@ -45,7 +47,7 @@ class CPU:
                     if code_value == '':
                         continue
 
-                    num = int(code_value)
+                    num = int(code_value, 2)
                     self.ram[address] = num
                     address += 1
                     # print(bin(int(line)))
@@ -97,6 +99,7 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
+
         while self.is_running:
             instruction = self.ram_read(self.pc)
 
@@ -112,6 +115,11 @@ class CPU:
 
                 print(self.register[operand_a])
                 self.pc += 2
+
+            elif instruction == self.ops['MUL']:
+                self.register[operand_a] = self.register[operand_a] * \
+                    self.register[operand_b]
+                self.pc += 3
 
             elif instruction == self.ops['HLT']:
                 self.running = False
