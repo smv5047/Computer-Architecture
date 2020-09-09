@@ -13,17 +13,26 @@ class CPU:
         # 256 bit memory
         self.ram = [0] * 256
         # temporary memory, read and write to
-        self.register = [0] * 8
+        self.register = [0, 0, 0, 0, 0, 0, 0, 255]
         # program counter
         self.pc = 0
+        # Stack Pointer
+        self.sp = 7
         # ops codes
         # set of instruction codes
         self.ops = {
             'HLT': 0b00000001,  # Halt
             'LDI': 0b10000010,
             'PRN': 0b01000111,  # Print
-            'MUL': 0b10100010  # multiply
+            'MUL': 0b10100010,  # multiply
+            'POP': 0b01000110,
+            'PUSH': 0b01000101
         }
+
+    # def stack_pointer(self):
+    #     print(self.register[7])
+    #     self.register[self.sp] = len(self.ram)
+    #     print(self.register[7])
 
     def load(self):
         """Load a program into memory."""
@@ -39,6 +48,7 @@ class CPU:
             # LOAD FILE FROM SYS.ARGV[1]
             with open(sys.argv[1]) as f:
                 for line in f:
+
                     # split the current lin on # symbol
                     split_line = line.split('#')
                     # removes whitespace and \n character
@@ -121,9 +131,39 @@ class CPU:
                     self.register[operand_b]
                 self.pc += 3
 
+            elif instruction == self.ops['POP']:
+                # get register
+                given_register = self.ram[self.pc+1]
+                # write the value in memory at the top of stack to the given register
+                # get value from memory
+                print(self.register)
+                print(self.ram[-20:])
+                value_from_memory = self.ram[self.register[self.sp]]
+                self.register[given_register] = value_from_memory
+                # increment the stack pointer
+                # if self.register[self.sp] < len(self.ram)-1:
+                self.register[self.sp] += 1
+                self.pc += 2
+
+            elif instruction == self.ops['PUSH']:
+                # get register we will be working with
+                given_register = self.ram[self.pc+1]
+                # get  value in that register
+                # stack pointer, we want to decress it
+                print(self.register)
+                print(self.ram[-20:])
+                value_in_register = self.register[given_register]
+                # decrement the Stack Pointer
+                # since the 8th spot in register is reserved for stack pointer
+                self.register[self.sp] -= 1
+                # write the value of the given register
+                self.ram[self.register[self.sp]] = value_in_register
+                # increment pc by 2
+                self.pc += 2
+
             elif instruction == self.ops['HLT']:
                 self.running = False
-                self.pc += 1
+                sys.exit(0)
 
             else:
                 print(f"Unknown instruction {instruction}")
