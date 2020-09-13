@@ -18,6 +18,11 @@ class CPU:
         self.pc = 0
         # Stack Pointer
         self.sp = 7
+        # Flags register
+        # set 5 to 1 if less than
+        # set 6 to 1 if greater than
+        # set 7 to 1 if equal
+        self.fl = [0] * 8
         # ops codes
         # set of instruction codes
         self.ops = {
@@ -75,11 +80,17 @@ class CPU:
         """ALU operations."""
         print("in the ALU")
         if op == "ADD":
-            print('deeper in add')
-            print(self.register[reg_a])
-            print(self.register[reg_b])
             self.register[reg_a] += self.register[reg_b]
         # elif op == "SUB": etc
+        elif op == "CMP":
+            print("CMP")
+            if self.register[reg_a] == self.register[reg_b]:
+                self.fl[7] == 1
+            if self.register[reg_a] < self.register[reg_b]:
+                self.fl[5] == 1
+            if self.register[reg_a] > self.register[reg_b]:
+                self.fl[6] == 1
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -126,9 +137,9 @@ class CPU:
             operand_b = self.ram_read(self.pc+2)
             print(instruction)
             if instruction == self.ops['ADD']:
-                print('inside add')
+
                 self.alu("ADD", operand_a, operand_b)
-                print('down in add')
+
                 self.pc += 3
 
             elif instruction == self.ops['LDI']:
@@ -200,6 +211,10 @@ class CPU:
             elif instruction == self.ops['NOP']:
                 print('nop')
                 continue
+
+            elif instruction == self.ops['CMP']:
+                self.alu("CMP", operand_a, operand_b)
+                self.pc += 3
 
             else:
                 self.trace()
