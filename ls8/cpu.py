@@ -26,7 +26,11 @@ class CPU:
             'PRN': 0b01000111,  # Print
             'MUL': 0b10100010,  # multiply
             'POP': 0b01000110,
-            'PUSH': 0b01000101
+            'PUSH': 0b01000101,
+            'CALL': 0b01010000,
+            'RET': 0b00010001,
+            'ADD': 0b10100000,
+            'NOP': 0b00000000
         }
 
     # def stack_pointer(self):
@@ -68,8 +72,11 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-
+        print("in the ALU")
         if op == "ADD":
+            print('deeper in add')
+            print(self.register[reg_a])
+            print(self.register[reg_b])
             self.register[reg_a] += self.register[reg_b]
         # elif op == "SUB": etc
         else:
@@ -111,12 +118,19 @@ class CPU:
         """Run the CPU."""
 
         while self.is_running:
+
             instruction = self.ram_read(self.pc)
 
             operand_a = self.ram_read(self.pc+1)
             operand_b = self.ram_read(self.pc+2)
+            print(instruction)
+            if instruction == self.ops['ADD']:
+                print('inside add')
+                self.alu("ADD", operand_a, operand_b)
+                print('down in add')
+                self.pc += 3
 
-            if instruction == self.ops['LDI']:
+            elif instruction == self.ops['LDI']:
 
                 self.register[operand_a] = operand_b
                 self.pc += 3
@@ -161,11 +175,33 @@ class CPU:
                 # increment pc by 2
                 self.pc += 2
 
+            elif instruction == self.ops['CALL']:
+                # get the given register in the operand
+                given_register = self.ram[self.pc+1]
+                # Store the return address [PC +2) onto the stack
+                # decrement the Stack Pointer
+                self.register[self.sp] -= 1
+                # write return address
+                self.ram[self.register[self.sp]] = self.pc+2
+                # SET PC TO value inside givne register
+                self.pc = self.register[given_register]
+
+            elif instruction == self.ops['RET']:
+                # set PC to the value at the top of the stack
+                self.pc = self.ram[self.register[self.sp]]
+                # POP from stack
+                self.register[self.sp] += 1
+
             elif instruction == self.ops['HLT']:
                 self.running = False
                 sys.exit(0)
 
+            elif instruction == self.ops['NOP']:
+                print('nop')
+                continue
+
             else:
+                self.trace()
                 print(f"Unknown instruction {instruction}")
                 # program did not end cleanly
                 sys.exit(1)
