@@ -36,7 +36,10 @@ class CPU:
             'RET': 0b00010001,
             'ADD': 0b10100000,
             'NOP': 0b00000000,
-            'CMP': 0b10100111
+            'CMP': 0b10100111,
+            'JMP': 0b01010100,
+            'JEQ': 0b01010101,
+            'JNE': 0b01010110
         }
 
     # def stack_pointer(self):
@@ -86,9 +89,9 @@ class CPU:
             print("CMP")
             if self.register[reg_a] == self.register[reg_b]:
                 self.fl[7] == 1
-            if self.register[reg_a] < self.register[reg_b]:
+            elif self.register[reg_a] < self.register[reg_b]:
                 self.fl[5] == 1
-            if self.register[reg_a] > self.register[reg_b]:
+            elif self.register[reg_a] > self.register[reg_b]:
                 self.fl[6] == 1
 
         else:
@@ -215,6 +218,21 @@ class CPU:
             elif instruction == self.ops['CMP']:
                 self.alu("CMP", operand_a, operand_b)
                 self.pc += 3
+
+            elif instruction == self.ops['JMP']:
+                # jump to the address stored in the given register
+                jump_address = self.register[operand_a]
+                # set the pc to the address stored in the given register
+                self.pc = jump_address
+
+            elif instruction == self.ops['JEQ']:
+                # if equal flag is set to true,
+                # jump to the address stored in a givne register
+                pass
+
+            elif instruction == self.ops['JNE']:
+                # If equal flag is not set to 1
+                # jump to address stored in the given register
 
             else:
                 self.trace()
