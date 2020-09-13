@@ -30,7 +30,8 @@ class CPU:
             'CALL': 0b01010000,
             'RET': 0b00010001,
             'ADD': 0b10100000,
-            'NOP': 0b00000000
+            'NOP': 0b00000000,
+            'CMP': 0b10100111
         }
 
     # def stack_pointer(self):
