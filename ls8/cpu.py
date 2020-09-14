@@ -91,19 +91,19 @@ class CPU:
             self.register[reg_a] += self.register[reg_b]
         # elif op == "SUB": etc
         elif op == "CMP":
-
+            print("CMP")
             if reg_a == reg_b:
-                # self.fl["L"] = 0
-                # self.fl["G"] = 0
+                self.fl["L"] = 0
+                self.fl["G"] = 0
                 self.fl["E"] = 1
             elif reg_a < reg_b:
                 self.fl["L"] = 1
-                # self.fl["G"] = 0
-                # self.fl["E"] = 0
+                self.fl["G"] = 0
+                self.fl["E"] = 0
             elif reg_a > reg_b:
-                # self.fl["L"] = 0
+                self.fl["L"] = 0
                 self.fl["G"] = 1
-                # self.fl["E"] = 0
+                self.fl["E"] = 0
 
         else:
             raise Exception("Unsupported ALU operation")
@@ -161,6 +161,7 @@ class CPU:
                 self.pc += 3
 
             elif instruction == self.ops['PRN']:
+                self.trace()
                 print(self.register[operand_a])
                 self.pc += 2
 
@@ -220,7 +221,9 @@ class CPU:
                 print('nop')
 
             elif instruction == self.ops['CMP']:
-                self.alu("CMP", operand_a, operand_b)
+                reg_a = self.register[operand_a]
+                reg_b = self.register[operand_b]
+                self.alu("CMP", reg_a, reg_b)
                 self.pc += 3
 
             elif instruction == self.ops['JMP']:
