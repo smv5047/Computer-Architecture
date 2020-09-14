@@ -91,7 +91,7 @@ class CPU:
             self.register[reg_a] += self.register[reg_b]
         # elif op == "SUB": etc
         elif op == "CMP":
-            print("CMP")
+
             if reg_a == reg_b:
                 self.fl["L"] = 0
                 self.fl["G"] = 0
@@ -161,7 +161,6 @@ class CPU:
                 self.pc += 3
 
             elif instruction == self.ops['PRN']:
-                self.trace()
                 print(self.register[operand_a])
                 self.pc += 2
 
