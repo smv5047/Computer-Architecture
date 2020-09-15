@@ -17,6 +17,7 @@ class CPU:
         # program counter
         self.pc = 0
         # Stack Pointer
+        # Could also change to len(self.register)
         self.sp = 7
         # Flags register
         # set 5 to 1 if less than
@@ -46,11 +47,6 @@ class CPU:
             'JEQ': 0b01010101,
             'JNE': 0b01010110
         }
-
-    # def stack_pointer(self):
-    #     print(self.register[7])
-    #     self.register[self.sp] = len(self.ram)
-    #     print(self.register[7])
 
     def load(self):
         """Load a program into memory."""
