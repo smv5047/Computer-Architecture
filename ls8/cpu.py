@@ -18,6 +18,16 @@ class CPU:
         self.pc = 0
         # Stack Pointer
         self.sp = 7
+        # Flags register
+        # set 5 to 1 if less than
+        # set 6 to 1 if greater than
+        # set 7 to 1 if equal
+        # self.fl = [0] * 8
+        self.fl = {
+            "E": 0,
+            "L": 0,
+            "G": 0
+        }
         # ops codes
         # set of instruction codes
         self.ops = {
@@ -30,7 +40,11 @@ class CPU:
             'CALL': 0b01010000,
             'RET': 0b00010001,
             'ADD': 0b10100000,
-            'NOP': 0b00000000
+            'NOP': 0b00000000,
+            'CMP': 0b10100111,
+            'JMP': 0b01010100,
+            'JEQ': 0b01010101,
+            'JNE': 0b01010110
         }
 
     # def stack_pointer(self):
@@ -72,13 +86,25 @@ class CPU:
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
-        print("in the ALU")
+
         if op == "ADD":
-            print('deeper in add')
-            print(self.register[reg_a])
-            print(self.register[reg_b])
             self.register[reg_a] += self.register[reg_b]
         # elif op == "SUB": etc
+        elif op == "CMP":
+
+            if reg_a == reg_b:
+                self.fl["L"] = 0
+                self.fl["G"] = 0
+                self.fl["E"] = 1
+            elif reg_a < reg_b:
+                self.fl["L"] = 1
+                self.fl["G"] = 0
+                self.fl["E"] = 0
+            elif reg_a > reg_b:
+                self.fl["L"] = 0
+                self.fl["G"] = 1
+                self.fl["E"] = 0
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -123,11 +149,10 @@ class CPU:
 
             operand_a = self.ram_read(self.pc+1)
             operand_b = self.ram_read(self.pc+2)
-            print(instruction)
             if instruction == self.ops['ADD']:
-                print('inside add')
+
                 self.alu("ADD", operand_a, operand_b)
-                print('down in add')
+
                 self.pc += 3
 
             elif instruction == self.ops['LDI']:
@@ -136,7 +161,6 @@ class CPU:
                 self.pc += 3
 
             elif instruction == self.ops['PRN']:
-
                 print(self.register[operand_a])
                 self.pc += 2
 
@@ -150,8 +174,6 @@ class CPU:
                 given_register = self.ram[self.pc+1]
                 # write the value in memory at the top of stack to the given register
                 # get value from memory
-                print(self.register)
-                print(self.ram[-20:])
                 value_from_memory = self.ram[self.register[self.sp]]
                 self.register[given_register] = value_from_memory
                 # increment the stack pointer
@@ -164,8 +186,6 @@ class CPU:
                 given_register = self.ram[self.pc+1]
                 # get  value in that register
                 # stack pointer, we want to decress it
-                print(self.register)
-                print(self.ram[-20:])
                 value_in_register = self.register[given_register]
                 # decrement the Stack Pointer
                 # since the 8th spot in register is reserved for stack pointer
@@ -198,7 +218,38 @@ class CPU:
 
             elif instruction == self.ops['NOP']:
                 print('nop')
-                continue
+
+            elif instruction == self.ops['CMP']:
+                reg_a = self.register[operand_a]
+                reg_b = self.register[operand_b]
+                self.alu("CMP", reg_a, reg_b)
+                self.pc += 3
+
+            elif instruction == self.ops['JMP']:
+                # jump to the address stored in the given register
+                given_register = operand_a
+                # set the pc to the address stored in the given register
+                self.pc = self.register[given_register]
+
+            elif instruction == self.ops['JEQ']:
+                # if equal flag is set to true,
+                if self.fl["E"] == 1:
+                    # jump to the address stored in the given register
+                    given_register = operand_a
+                    # set the pc to the address stored in the given register
+                    self.pc = self.register[given_register]
+                else:
+                    self.pc += 2
+
+            elif instruction == self.ops['JNE']:
+                # If equal flag is not set to 1
+                if self.fl["E"] == 0:
+                    # jump to the address stored in the given register
+                    given_register = operand_a
+                    # set the pc to the address stored in the given register
+                    self.pc = self.register[given_register]
+                else:
+                    self.pc += 2
 
             else:
                 self.trace()
